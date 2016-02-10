@@ -1,0 +1,51 @@
+RMC (Runtime Machine Configuration)
+
+================================================================================
+
+RMC mechanism makes it possible to boot and deploy board-specific configurations
+or fragments on multiple different boards, with a single distribution image.
+Configurations can be kernel command line fragments as well as files associated
+to a board. The result of installation from a RMC image should be exact same as
+what a conventional board-specific image creates on its target board.
+
+To compile RMC, simply run "make" in top directory of rmc project.
+
+How it works:
+Step 1. You run rmc tool (rmc executable) compiled for target architecture on
+each board to obtain "fingerprints" data. That's the only rmc-specific file to
+be checked in your source tree when integrating rmc.
+
+Step 2. Let's say you have a kernel command fragment, and/or a list of files you
+want to install on each board. You run rmc tool to generate a record file that
+packs all of the above bits for each board: a signature computed from fingerprint,
+data, command line fragment, and any file blobs you provided. This step can be
+done on a host machine with rmc compiled for host architecture.
+
+Step 3. Now you can use rmc tool to generate a RMC database file which packs all
+records.
+
+Step 4. The build system integrated with rmc feature is responsible to include
+rmc tool compiled for target, rmc database file, a UEFI boot loader modified to
+have access RMC service  and an installer modified for RMC into a live-boot
+image.
+
+Step 5.
+In a live boot session, RMC bootloader will call services provided by
+RMC libraries to get board's fingerprint and then query RMC database file to
+get kernel command line fragment, so that it can append the fragment to a new
+command line prior to boot kernel.
+
+If user chooses "install" boot option, RMC installer application or script calls
+same RMC libraries or rmc executable to obtain command line fragment and other
+file blobs, then deploy them on target board.
+
+RMC tool, database file and libraries are not installed on target, however. The
+life cycle of RMC is limited to live-boot and installation. This design is to
+eliminate any concerns on performance debt on target boards. Actually, we don't
+consider it is a valid use case to have RMC on a board already provisioned with
+its specific configurations.
+
+Running rmc without any options will show usage and examples. Root permission is
+required for some options. This could be the main cause when you get an error
+related to permission when you run the tool. Please also note RMC feature can
+only work on a system with UEFI SMBIOS firmware and kernel with EFI support.
