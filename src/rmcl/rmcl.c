@@ -177,7 +177,6 @@ int query_policy_from_db(rmc_fingerprint_t *fingerprint, BYTE *rmc_db, BYTE type
     QWORD record_idx = 0;   /* offset of each reacord in db*/
     QWORD meta_idx = 0;     /* offset of each meta in a record */
     QWORD policy_idx = 0;   /* offset of policy in a meta */
-    QWORD i;
 
     if (!fingerprint || !rmc_db || !policy)
         return 1;
@@ -200,16 +199,14 @@ int query_policy_from_db(rmc_fingerprint_t *fingerprint, BYTE *rmc_db, BYTE type
         /* record data may not be aligned like db pointer does
          * We align record header by copying
          */
-        for (i = 0; i < sizeof(rmc_record_header_t); i++)
-            *((BYTE *)&record_header + i) = rmc_db[record_idx + i];
+        memcpy(&record_header, rmc_db + record_idx, sizeof(rmc_record_header_t));
 
         /* found matched record */
         if (!match_record(&record_header, &signature)) {
             /* find meta by type and name */
             for (meta_idx = record_idx + sizeof(rmc_record_header_t); meta_idx < record_idx + record_header.length;) {
                  /* re-align meta header struct by copying*/
-                for (i = 0; i < sizeof(rmc_meta_header_t); i++)
-                    *((BYTE *) &meta_header + i) = rmc_db[meta_idx + i];
+                memcpy(&meta_header, rmc_db + meta_idx, sizeof(rmc_meta_header_t));
 
                 if (meta_header.type == type) {
 
