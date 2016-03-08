@@ -19,15 +19,40 @@ static const BYTE rmc_db_signature[RMC_DB_SIG_LEN] = {'R', 'M', 'C', 'D', 'B'};
 static int generate_signature_from_fingerprint(rmc_fingerprint_t *fingerprint, rmc_signature_t *signature) {
 
     size_t sig_len = sizeof(signature->raw);
+    size_t i = 0;
+    size_t p = 0;
+    size_t q = 0;
 
     if (!signature || !fingerprint)
         return 1;
 
-    /* We will have mroe advanced hash algorithm */
+    /* We will have more advanced hash algorithm */
     memset(signature->raw, 0, sig_len);
 
-    strncpy((char *)signature->raw, fingerprint->named_fingers.index.value, sig_len);
-
+    /* pick a byte from each finger ever time. Interleaving is just to provide a fair chance
+     * for all involved finger values without an arbitrary quota, not for hash-like purposes */
+    for (i = 0; i < sig_len; i++) {
+        if (i & 1) {
+            /* When reach the end of either of two finger values, don't copy '\0' which is a common
+             * character in every string. By doing so we have 2 more bytes for valuable info in
+             * signature.
+             * In the same case, take whatever left in another finger's data for the rest of signature.
+             */
+            if (fingerprint->named_fingers.index.value[p] == '\0') {
+                strncpy((char *)(signature->raw + i), fingerprint->named_fingers.thumb.value + q, sig_len - i);
+                break;
+            }
+            else
+                signature->raw[i] = fingerprint->named_fingers.index.value[p++];
+        } else {
+            if (fingerprint->named_fingers.thumb.value[q] == '\0') {
+                strncpy((char *)(signature->raw + i), fingerprint->named_fingers.index.value + p, sig_len - i);
+                break;
+            }
+            else
+                signature->raw[i] = fingerprint->named_fingers.thumb.value[q++];
+        }
+    }
     return 0;
 }
 
