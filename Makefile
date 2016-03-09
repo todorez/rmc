@@ -16,19 +16,19 @@ CFLAGS := -static -Wall -O2 -Iinc
 all: rmc librmcl librsmp
 
 $(ALL_OBJS): %.o: %.c
-	gcc -c $(CFLAGS) $< -o $@
+	@gcc -c $(CFLAGS) $< -o $@
 
 librmcl: $(RMCL_OBJ)
-	ar rcs src/rmcl/$@.a $<
+	@ar rcs src/rmcl/$@.a $<
 
 librsmp: $(RSMP_OBJ)
-	ar rcs src/rsmp/$@.a $<
+	@ar rcs src/rsmp/$@.a $<
 
 rmc: $(RMC_TOOL_OBJ) librsmp librmcl
-	gcc $(CFLAGS) -Lsrc/rsmp -Lsrc/rmcl -lrsmp -lrmcl $(RMC_TOOL_OBJ) src/rmcl/librmcl.a src/rsmp/librsmp.a -o src/$@
+	@gcc $(CFLAGS) -Lsrc/rsmp -Lsrc/rmcl -lrsmp -lrmcl $(RMC_TOOL_OBJ) src/rmcl/librmcl.a src/rsmp/librsmp.a -o src/$@
 
 clean:
-	rm -f $(ALL_OBJS) src/rmc src/rmcl/librmcl.a src/rsmp/librsmp.a
+	@rm -f $(ALL_OBJS) src/rmc src/rmcl/librmcl.a src/rsmp/librsmp.a
 
 .PHONY: clean rmc librmcl librsmp
 
