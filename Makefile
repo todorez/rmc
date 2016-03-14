@@ -9,6 +9,17 @@ RMCL_OBJ := $(patsubst %.c,%.o,$(RMCL_SRC))
 RSMP_SRC :=$(wildcard src/rsmp/*.c)
 RSMP_OBJ := $(patsubst %.c,%.o,$(RSMP_SRC))
 
+# install rmcl library and necessary headers for rmcl.
+RMC_INSTALL_HEADERS := inc/rmcl.h inc/rmc_types.h
+RMC_INSTALL_LIBS := src/rmcl/librmcl.a
+
+ifeq ($(strip $(RMC_INSTALL_PREFIX)),)
+RMC_INSTALL_PREFIX := /usr
+endif
+
+RMC_INSTALL_HEADER_PATH := $(RMC_INSTALL_PREFIX)/include/
+RMC_INSTALL_LIBS_PATH := $(RMC_INSTALL_PREFIX)/lib/
+
 ALL_OBJS := $(RMC_TOOL_OBJ) $(RMCL_OBJ) $(RSMP_OBJ)
 
 CFLAGS := -static -Wall -O2 -Iinc
@@ -32,3 +43,10 @@ clean:
 
 .PHONY: clean rmc librmcl librsmp
 
+install:
+	@mkdir -p $(RMC_INSTALL_HEADER_PATH)
+	@for each in $(RMC_INSTALL_HEADERS); do \
+		install -m 644 $$each $(RMC_INSTALL_HEADER_PATH); done
+	@mkdir -p $(RMC_INSTALL_LIBS_PATH)
+	@for each in $(RMC_INSTALL_LIBS); do \
+		install -m 644 $$each $(RMC_INSTALL_LIBS_PATH); done
