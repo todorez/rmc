@@ -19,10 +19,10 @@ $(ALL_OBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
 librmcl: $(RMCL_OBJ)
-	@ar rcs src/rmcl/$@.a $<
+	@$(AR) rcs src/rmcl/$@.a $<
 
 librsmp: $(RSMP_OBJ)
-	@ar rcs src/rsmp/$@.a $<
+	@$(AR) rcs src/rsmp/$@.a $<
 
 rmc: $(RMC_TOOL_OBJ) librsmp librmcl
 	$(CC) $(CFLAGS) -Lsrc/rsmp -Lsrc/rmcl -lrsmp -lrmcl $(RMC_TOOL_OBJ) src/rmcl/librmcl.a src/rsmp/librsmp.a -o src/$@
