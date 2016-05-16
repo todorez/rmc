@@ -19,6 +19,7 @@ endif
 
 RMC_INSTALL_HEADER_PATH := $(RMC_INSTALL_PREFIX)/include/
 RMC_INSTALL_LIBS_PATH := $(RMC_INSTALL_PREFIX)/lib/
+RMC_INSTALL_BIN_PATH := $(RMC_INSTALL_PREFIX)/bin/
 
 ALL_OBJS := $(RMC_TOOL_OBJ) $(RMCL_OBJ) $(RSMP_OBJ)
 
@@ -50,3 +51,5 @@ install:
 	@mkdir -p $(RMC_INSTALL_LIBS_PATH)
 	@for each in $(RMC_INSTALL_LIBS); do \
 		install -m 644 $$each $(RMC_INSTALL_LIBS_PATH); done
+	@mkdir -p $(RMC_INSTALL_BIN_PATH)
+	@install -m 755 src/rmc $(RMC_INSTALL_BIN_PATH)
