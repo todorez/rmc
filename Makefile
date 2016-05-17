@@ -10,8 +10,8 @@ RSMP_SRC :=$(wildcard src/rsmp/*.c)
 RSMP_OBJ := $(patsubst %.c,%.o,$(RSMP_SRC))
 
 # install rmcl library and necessary headers for rmcl.
-RMC_INSTALL_HEADERS := inc/rmcl.h inc/rmc_types.h
-RMC_INSTALL_LIBS := src/rmcl/librmcl.a
+RMC_INSTALL_HEADERS := inc/rmcl.h inc/rmc_types.h inc/rsmp.h
+RMC_INSTALL_LIBS := src/rmcl/librmcl.a src/rsmp/librsmp.a
 
 ifeq ($(strip $(RMC_INSTALL_PREFIX)),)
 RMC_INSTALL_PREFIX := /usr
