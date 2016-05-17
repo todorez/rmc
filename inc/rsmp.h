@@ -3,7 +3,7 @@
  * header file for standard smbios structure definitions
  * Reference: SMBIOS Reference Specification 3.0.0
  */
-#ifndef INC_RSMP_BIOS_H_
+#ifndef INC_RSMP_H_
 #define INC_RSMP_H_
 
 #include <stdint.h>
@@ -82,4 +82,4 @@ extern int rsmp_get_smbios_strcut(uint8_t *start, uint64_t *struct_addr, uint16_
  */
 extern int rsmp_get_fingerprint_from_smbios_struct(BYTE *addr, rmc_fingerprint_t *fp);
 
-#endif /* INC_RSMP_BIOS_H_ */
+#endif /* INC_RSMP_H_ */
