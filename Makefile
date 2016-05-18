@@ -23,7 +23,7 @@ RMC_INSTALL_BIN_PATH := $(RMC_INSTALL_PREFIX)/bin/
 
 ALL_OBJS := $(RMC_TOOL_OBJ) $(RMCL_OBJ) $(RSMP_OBJ)
 
-CFLAGS := -static -Wall -O2 -Iinc
+CFLAGS := -static -Wall -O2 -Iinc $(RMC_CFLAGS)
 
 all: rmc librmcl librsmp
 
