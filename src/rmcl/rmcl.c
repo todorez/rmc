@@ -5,8 +5,6 @@
 
 #include <rmc_types.h>
 #include <rmcl.h>
-#include <string.h>
-#include <stddef.h>
 
 static const BYTE rmc_db_signature[RMC_DB_SIG_LEN] = {'R', 'M', 'C', 'D', 'B'};
 

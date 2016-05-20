@@ -3,10 +3,12 @@
  * rmc_types.h
  */
 
-#include <stdint.h>
-
 #ifndef INC_RMC_TYPES_H_
 #define INC_RMC_TYPES_H_
+
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
 
 typedef uint8_t BYTE;
 typedef uint16_t WORD;

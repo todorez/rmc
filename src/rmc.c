@@ -7,8 +7,6 @@
  *  - Provide policy fragments like command line to its callers in user space
  */
 
-
-#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -20,7 +18,6 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <string.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 

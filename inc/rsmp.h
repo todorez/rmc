@@ -6,9 +6,6 @@
 #ifndef INC_RSMP_H_
 #define INC_RSMP_H_
 
-#include <stddef.h>
-#include <stdint.h>
-#include <rmc_types.h>
 #include <rmcl.h>
 
 #pragma pack(1)

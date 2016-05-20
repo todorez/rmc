@@ -4,7 +4,6 @@
  */
 
 #include <rsmp.h>
-#include <string.h>
 
 /*
  * return a string from given smbios structure table by string's index

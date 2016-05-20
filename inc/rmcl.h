@@ -7,8 +7,7 @@
 
 #ifndef INC_RMCL_H_
 #define INC_RMCL_H_
-#include <stdint.h>
-#include <stddef.h>
+
 #include <rmc_types.h>
 
 #pragma pack(1)
