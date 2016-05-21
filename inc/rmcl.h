@@ -10,6 +10,10 @@
 
 #include <rmc_types.h>
 
+#ifndef RMC_EFI
+#include <stdlib.h>
+#endif
+
 #pragma pack(1)
 
 /*
@@ -126,29 +130,6 @@ typedef struct rmc_record_file {
     size_t length;
     struct rmc_record_file *next;  /* next rmc record file, or null as terminator for the last element */
 } rmc_record_file_t;
-
-#ifdef RMC_UEFI_CONTEXT
-/* To be implemented */
-static __inline__ BYTE * rmc_malloc(size_t size) {
-    return NULL;
-}
-
-static __inline__ void rmc_free(void * p) {
-
-}
-
-#else /* linux user space */
-#include <stdlib.h>
-
-static __inline__ void *rmc_malloc(size_t size) {
-    return malloc(size);
-}
-
-static __inline__ void rmc_free(void * p) {
-    free(p);
-}
-
-#endif
 
 /*
  * Generate RMC record file (This function allocate memory)

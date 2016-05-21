@@ -5,6 +5,10 @@
 
 #include <rsmp.h>
 
+#ifdef RMC_EFI
+#include <rmc_util.h>
+#endif
+
 /*
  * return a string from given smbios structure table by string's index
  * (in) header: start address of structure table;

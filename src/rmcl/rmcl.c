@@ -6,6 +6,10 @@
 #include <rmc_types.h>
 #include <rmcl.h>
 
+#ifdef RMC_EFI
+#include <rmc_util.h>
+#endif
+
 static const BYTE rmc_db_signature[RMC_DB_SIG_LEN] = {'R', 'M', 'C', 'D', 'B'};
 
 /* compute a finger to signature which is stored in record
@@ -54,6 +58,7 @@ static int generate_signature_from_fingerprint(rmc_fingerprint_t *fingerprint, r
     return 0;
 }
 
+#ifndef RMC_EFI
 int rmcl_generate_record(rmc_fingerprint_t *fingerprint, rmc_policy_file_t *policy_files, rmc_record_file_t *record_file) {
 
     rmc_policy_file_t *tmp = NULL;
@@ -79,7 +84,7 @@ int rmcl_generate_record(rmc_fingerprint_t *fingerprint, rmc_policy_file_t *poli
         tmp = tmp->next;
     }
 
-    blob = rmc_malloc(record_len);
+    blob = malloc(record_len);
 
     if (!blob)
         return 1;
@@ -88,7 +93,7 @@ int rmcl_generate_record(rmc_fingerprint_t *fingerprint, rmc_policy_file_t *poli
     record = (rmc_record_header_t *)blob;
 
     if (generate_signature_from_fingerprint(fingerprint, &record->signature)) {
-        rmc_free(blob);
+        free(blob);
         return 1;
     }
 
@@ -153,7 +158,7 @@ int rmcl_generate_db(rmc_record_file_t *record_files, BYTE **rmc_db, size_t *len
         tmp = tmp->next;
     }
 
-    db = rmc_malloc(db_len);
+    db = malloc(db_len);
 
     if (!db)
         return 1;
@@ -183,6 +188,7 @@ int rmcl_generate_db(rmc_record_file_t *record_files, BYTE **rmc_db, size_t *len
     return 0;
 }
 
+#endif /* RMC_EFI */
 /*
  * Check if a record has signature matched with a given signature
  *
