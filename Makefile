@@ -9,16 +9,10 @@ RMCL_OBJ := $(patsubst %.c,%.o,$(RMCL_SRC))
 RSMP_SRC :=$(wildcard src/rsmp/*.c)
 RSMP_OBJ := $(patsubst %.c,%.o,$(RSMP_SRC))
 
-# install rmcl library and necessary headers for rmcl.
-RMC_INSTALL_HEADERS := inc/rmcl.h inc/rmc_types.h inc/rsmp.h
-RMC_INSTALL_LIBS := src/rmcl/librmcl.a src/rsmp/librsmp.a
-
 ifeq ($(strip $(RMC_INSTALL_PREFIX)),)
 RMC_INSTALL_PREFIX := /usr
 endif
 
-RMC_INSTALL_HEADER_PATH := $(RMC_INSTALL_PREFIX)/include/rmc/
-RMC_INSTALL_LIBS_PATH := $(RMC_INSTALL_PREFIX)/lib/
 RMC_INSTALL_BIN_PATH := $(RMC_INSTALL_PREFIX)/bin/
 
 ALL_OBJS := $(RMC_TOOL_OBJ) $(RMCL_OBJ) $(RSMP_OBJ)
@@ -44,12 +38,7 @@ clean:
 
 .PHONY: clean rmc librmcl librsmp
 
+# Only install RMC tool in user space build, no librmcl, librsmp and headers.
 install:
-	@mkdir -p $(RMC_INSTALL_HEADER_PATH)
-	@for each in $(RMC_INSTALL_HEADERS); do \
-		install -m 644 $$each $(RMC_INSTALL_HEADER_PATH); done
-	@mkdir -p $(RMC_INSTALL_LIBS_PATH)
-	@for each in $(RMC_INSTALL_LIBS); do \
-		install -m 644 $$each $(RMC_INSTALL_LIBS_PATH); done
 	@mkdir -p $(RMC_INSTALL_BIN_PATH)
 	@install -m 755 src/rmc $(RMC_INSTALL_BIN_PATH)
