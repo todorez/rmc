@@ -34,7 +34,7 @@ RMC_INSTALL_LIBS_PATH := $(RMC_INSTALL_PREFIX)/lib/
 SHARED_OBJS := src/util/util.efi.o
 ALL_OBJS := $(RMCL_OBJ) $(RSMP_OBJ) $(SHARED_OBJS)
 
-CFLAGS := -DRMC_EFI -Wall -O2 -Iinc -fpic -nostdinc -nostdlib  -fno-builtin \
+CFLAGS := -DRMC_EFI -Wall -O2 -Iinc -fpic -nostdinc -nostdlib  -fno-builtin -std=gnu90 \
 	   -I$(RMC_EFI_HEADER_PREFIX) -I$(RMC_EFI_HEADER_PREFIX)/$(RMC_EFI_ARCH) $(RMC_CFLAGS)
 
 all: librmclefi librsmpefi
