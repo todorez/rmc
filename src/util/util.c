@@ -2,27 +2,27 @@
 
 void *memset(void *s, BYTE c, size_t n) {
     BYTE *p = (BYTE *)s;
-    while (--n)
+    while (n--)
         *p++ = c;
     return s;
 }
 
 int strncmp(const char *s1, const char *s2, size_t n) {
-    while (--n) {
-        if (*s1 != *s2 || *s1 == '\0')
-            break;
+    while (n--) {
+        if (*s1 == '\0' || *s1 != *s2)
+            return *s1 - *s2;
         s1++;
         s2++;
     }
 
-    return *s1 - *s2;
+    return 0;
 }
 
 void *memcpy(void *d, const void *s, size_t n) {
     BYTE *p = d;
     BYTE *q = (BYTE *)s;
 
-    while (--n)
+    while (n--)
         *p++ = *q++;
 
     return d;
