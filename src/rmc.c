@@ -39,7 +39,7 @@
 	"-G: generate rmc database file with records specified in record file list\n" \
 	"-C: get kernel command line fragment from database file for the board rmc is running on, output to stdout\n" \
 	"-B: get a flie blob with specified name associated to the board rmc is running on\n" \
-	"-d: database file to be queried" \
+	"-d: database file to be queried\n" \
 	"-o: path and name of output file of a specific command\n" \
 	"\n" \
     "Examples (Steps in an order to add board support into rmc):\n" \
@@ -54,7 +54,7 @@
     "rmc -C my_rmc.db\n\n" \
     "query a file blob named audio.conf associated to the board rmc is running on in database my_rmc.db and output\n" \
     "to /tmp/new_audio.conf:\n" \
-    "rmc -B audio.conf -d my_rmc.db -o /tmp/new_audio.conf\n"
+    "rmc -B audio.conf -d my_rmc.db -o /tmp/new_audio.conf\n\n"
 
 
 #define RMC_OPT_CAP_F   (1 << 0)
