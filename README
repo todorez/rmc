@@ -1,51 +1,65 @@
-RMC (Runtime Machine Configuration)
-
+Runtime Machine Configuration (RMC)
 ================================================================================
 
-RMC mechanism makes it possible to boot and deploy board-specific configurations
-or fragments on multiple different boards, with a single distribution image.
-Configurations can be kernel command line fragments as well as files associated
-to a board. The result of installation from a RMC image should be exact same as
-what a conventional board-specific image creates on its target board.
+RMC project provides BSP and OEM a new way to deal with configuration at a board
+or product level on multiple hardware targets at runtime. It answers two
+questions in a centralized approach:
+
+1) A unified way to identify a type of board in a software stack
+
+Developers run RMC tool on a running board to obtain a fingerprint file from a
+running board. The fingerprint file is the identity of board 'type' in software.
+
+Fingerprint file so far is the only RMC-specific data exposed to outside. Any
+software calling RMC to get board-specific data doesn't need to carry finger-
+print. It is only used to map data and board type in a RMC database.
+
+2) Access to data associated to a type of board based on its identity at runtime
+
+With the same RMC tool, developers can generate a RMC record file which contains
+a signature computed from board's fingerprint and all data specific to the type
+of board (provided by developers).
+
+The next step is to use RMC tool to generate a RMC database file with records
+for different boards.
+
+At runtime, clients (software to call RMC) query files for the type of the
+running board with filenames. Once called, via RMC tool or APIs provided from
+RMC libraris, RMC collects fingerprint of the running board, computes its
+signature, seeks any possible records in RMC database file (provided by callers),
+to match the board it runs on with signatures, and then return the file blob
+to caller if there is a blob with same name specified by the caller.
+
+RMC tool (CLI) lives in Linux user space. RMC libraries provides APIs in C, so
+that any programs can link with RMC libraries and call these APIs to get data
+specific to a type of board at runtime. RMC libraries can also be linked in EFI
+context for bootloaders, as well as in Linux user space.
+
+Further refactor work is planned to simplify the integration
+between RMC and other software clients.
+
+With RMC, developer of a client software can have a generic implementation of
+logic and hardcoded configuration file names in source code. RMC magically
+returns data for the type of running board at runtime.
 
 To compile RMC, simply run "make" in top directory of rmc project.
 
-How it works:
-Step 1. You run rmc tool (rmc executable) compiled for target architecture on
-each board to obtain "fingerprints" data. That's the only rmc-specific file to
-be checked in your source tree when integrating rmc.
+To get usage of RMC tool, just compile the project and run "rmc" without any
+arguments. Examples are also provided in usage message, in a rough order of
+recommended workflow.
 
-Step 2. Let's say you have a kernel command fragment, and/or a list of files you
-want to install on each board. You run rmc tool to generate a record file that
-packs all of the above bits for each board: a signature computed from fingerprint,
-data, command line fragment, and any file blobs you provided. This step can be
-done on a host machine with rmc compiled for host architecture.
+Refer to rmcl.h and rsmp.h for APIs. RMC tool itself uses these APIs, so it can
+be a good example (rmc.c).
 
-Step 3. Now you can use rmc tool to generate a RMC database file which packs all
-records.
+To integrate RMC into a build system (yocto, Android...):
+On build host, compile RMC tool for host architecture and use it to generate RMC
+database files with all fingerprints and board-specific data checked in source
+tree. Build system is responsible to manage fingerprints and data. RMC database
+files shall be available in live-boot or installer image.
 
-Step 4. The build system integrated with rmc feature is responsible to include
-rmc tool compiled for target, rmc database file, a UEFI boot loader modified to
-have access RMC service  and an installer modified for RMC into a live-boot
-image.
+For target, compile RMC tool and libraries again for target architecture. RMC
+tool, an executable, can be deployed to target for clients like scripts. RMC
+libraries are expected to be linked in programs.
 
-Step 5.
-In a live boot session, RMC bootloader will call services provided by
-RMC libraries to get board's fingerprint and then query RMC database file to
-get kernel command line fragment, so that it can append the fragment to a new
-command line prior to boot kernel.
-
-If user chooses "install" boot option, RMC installer application or script calls
-same RMC libraries or rmc executable to obtain command line fragment and other
-file blobs, then deploy them on target board.
-
-RMC tool, database file and libraries are not installed on target, however. The
-life cycle of RMC is limited to live-boot and installation. This design is to
-eliminate any concerns on performance debt on target boards. Actually, we don't
-consider it is a valid use case to have RMC on a board already provisioned with
-its specific configurations.
-
-Running rmc without any options will show usage and examples. Root permission is
-required for some options. This could be the main cause when you get an error
-related to permission when you run the tool. Please also note RMC feature can
-only work on a system with UEFI SMBIOS firmware and kernel with EFI support.
+Board is required to have UEFI and SMBIOS compliant firmware. The efi driver in
+Linux kernel is also necessary.
