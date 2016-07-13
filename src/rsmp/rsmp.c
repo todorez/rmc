@@ -64,7 +64,7 @@ int rsmp_get_smbios_strcut(uint8_t *start, uint64_t *struct_addr, uint16_t *stru
         return 0;
     } else if (!strncmp((char *)start, "_SM_", 4)) {
         *struct_addr = ep->ep_32.struct_tbl_addr;
-        *struct_len = ep->ep_32.max_struct_size;
+        *struct_len = ep->ep_32.struct_tbl_len;
         return 0;
     }
 
