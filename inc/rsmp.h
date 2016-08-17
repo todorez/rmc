@@ -8,7 +8,7 @@
 
 #include <rmcl.h>
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 /*
  * SMBIOS Entry Point Structure
@@ -59,6 +59,8 @@ typedef struct smbios_struct_hdr {
 
 
 #define SMBIOS_ENTRY_TAB_LEN sizeof(smbios_ep_t)
+
+#pragma pack(pop)
 
 /*
  * get smbios structure start address and total len
