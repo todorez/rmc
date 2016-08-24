@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #endif
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 /*
  * RMC Fingerprint
@@ -130,6 +130,8 @@ typedef struct rmc_record_file {
     size_t length;
     struct rmc_record_file *next;  /* next rmc record file, or null as terminator for the last element */
 } rmc_record_file_t;
+
+#pragma pack(pop)
 
 /*
  * Generate RMC record file (This function allocate memory)

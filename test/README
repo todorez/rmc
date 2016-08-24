@@ -1,0 +1,63 @@
+Test Suite of RMC project
+================================================================================
+
+To test RMC functionality, we provide scripts and some launched commercial
+boards with sample data.
+
+*.runtime.*: Test to run on a type of board
+
+*.build.*:   Test to run at build time
+
+=====
+db.build.sh - Test database generation with built-in samples
+
+What it does:
+() Compile rmc tool
+() Generate a RMC database file with data in ./boards and check if it is
+identical to a known fully-tested database based on same data.
+
+Usage:
+# To run test in test directory:
+./db.build.sh
+
+# To run test against another database checksum:
+RMC_TEST_DB_MD5=your_md5_digist_string ./db.build.sh
+
+# To obtain a copy of the current golden sample database, make sure no change
+# in ./boards, then run:
+RMC_TEST_DB_MD5="" ./db.build.sh
+
+=====
+rmctool.runtime.sh - Test querying data and fingerprint at runtime on target
+
+What it does:
+() Test obtaining fingerprint on a supported board
+() Test querying data on a supported board
+() Test querying data for other boards (negative case)
+
+Usage:
+Copy rmctool.runtime.sh, a database file and rmc tool onto target.
+Change permissions so that the test script and rmc tool for test are executable.
+
+# To run test with a provided rmc database file:
+./rmctool.runtime.sh database_file
+
+# To run test with a specified rmc tool:
+RMC_BIN=pathname_of_rmc ./rmctool.runtime.sh database_file
+
+# To run test and specify another directory for data generated in test:
+./rmctool.runtime.sh database_file test_dir
+
+=====
+Update sample data for test
+() Modify data in ./boards
+
+() Run this command to generate a new database file:
+RMC_TEST_DB_MD5="" ./db.build.sh
+
+() Run *.runtime.* scripts and pass ALL test cases on ALL boards with the new
+database file.
+
+() Update database checksum in ./db.build.sh
+
+() Run *.build.* scripts and pass all tests in build time.

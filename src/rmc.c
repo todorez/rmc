@@ -112,7 +112,7 @@ static int read_file(const char *pathname, char **data, size_t* len) {
 
     while (byte < total) {
         if ((tmp = read(fd, buf + byte, total - byte)) < 0) {
-            perror("rmc: failed to alloc read buf");
+            perror("rmc: failed to read file");
             free(buf);
             close(fd);
             return 1;
