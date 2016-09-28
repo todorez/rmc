@@ -82,11 +82,11 @@ int rsmp_get_fingerprint_from_smbios_struct(BYTE *addr, rmc_fingerprint_t *fp){
     initialize_fingerprint(fp);
 
     while (header->type != END_OF_TABLE_TYPE) {
-       for (fp_idx=0; fp_idx < RMC_FINGER_NUM; fp_idx++)
-           if (header->type == fp->rmc_fingers[fp_idx].type)
-               fp->rmc_fingers[fp_idx].value = (char*)get_string_from_struct_table(header, fp->rmc_fingers[fp_idx].offset);
+        for (fp_idx = 0; fp_idx < RMC_FINGER_NUM; fp_idx++)
+            if (header->type == fp->rmc_fingers[fp_idx].type)
+                fp->rmc_fingers[fp_idx].value = (char*)get_string_from_struct_table(header, fp->rmc_fingers[fp_idx].offset);
 
-       header = (smbios_struct_hdr_t *)forward_to_next_struct_table(header);
+        header = (smbios_struct_hdr_t *) forward_to_next_struct_table(header);
     }
 
     return 0;

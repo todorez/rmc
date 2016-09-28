@@ -59,9 +59,9 @@ static int generate_signature_from_fingerprint(rmc_fingerprint_t *fingerprint, r
 }
 
 #ifndef RMC_EFI
-int rmcl_generate_record(rmc_fingerprint_t *fingerprint, rmc_policy_file_t *policy_files, rmc_record_file_t *record_file) {
+int rmcl_generate_record(rmc_fingerprint_t *fingerprint, rmc_file_t *policy_files, rmc_record_file_t *record_file) {
 
-    rmc_policy_file_t *tmp = NULL;
+    rmc_file_t *tmp = NULL;
     QWORD cmd_len = 0;
     size_t record_len = 0;
     BYTE *blob = NULL;
@@ -198,7 +198,7 @@ static int match_record(rmc_record_header_t *r, rmc_signature_t* sig) {
     return strncmp((const char *)r->signature.raw, (const char *)sig->raw, sizeof(r->signature.raw));
 }
 
-int query_policy_from_db(rmc_fingerprint_t *fingerprint, BYTE *rmc_db, BYTE type, char *blob_name, rmc_policy_file_t *policy) {
+int query_policy_from_db(rmc_fingerprint_t *fingerprint, BYTE *rmc_db, BYTE type, char *blob_name, rmc_file_t *policy) {
     rmc_meta_header_t meta_header;
     rmc_db_header_t *db_header = NULL;
     rmc_record_header_t record_header;
