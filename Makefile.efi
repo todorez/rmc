@@ -2,15 +2,13 @@
 
 TOPDIR = $(shell if [ -z "$$PWD" ]; then pwd; else echo "$$PWD"; fi)
 
-RMCL_SRC :=$(wildcard src/rmcl/*.c)
-RMCL_OBJ := $(patsubst %.c,%.efi.o,$(RMCL_SRC))
+RMC_LIB_SRC := $(wildcard src/lib/common/*.c) \
+               $(wildcard src/util/*.c)
 
-RSMP_SRC :=$(wildcard src/rsmp/*.c)
-RSMP_OBJ := $(patsubst %.c,%.efi.o,$(RSMP_SRC))
+RMC_LIB_OBJ := $(patsubst %.c,%.efi.o,$(RMC_LIB_SRC))
 
-# install rmcl (UEFI) libraries and necessary headers for rmcl.
 RMC_INSTALL_HEADERS := inc/rmcl.h inc/rmc_types.h inc/rsmp.h inc/rmc_util.h
-RMC_INSTALL_LIBS := src/rmcl/librmclefi.a src/rsmp/librsmpefi.a
+RMC_INSTALL_LIBS := src/lib/librmcefi.a
 
 ifeq ($(strip $(RMC_EFI_ARCH)),)
 $(error "Missing: You must specify RMC_EFI_ARCH (ia32 or x86_64) for host")
@@ -22,43 +20,32 @@ else
 $(error "Unknown RMC_EFI_ARCH $(RMC_EFI_ARCH): it must be ia32 or x86_64")
 endif
 
-ifeq ($(strip $(RMC_INSTALL_PREFIX)),)
-RMC_INSTALL_PREFIX := /usr
-endif
-
 ifeq ($(strip $(RMC_EFI_HEADER_PREFIX)),)
 RMC_EFI_HEADER_PREFIX := /usr/include/efi/
 endif
 
+RMC_INSTALL_PREFIX := /usr
 RMC_INSTALL_HEADER_PATH := $(RMC_INSTALL_PREFIX)/include/rmc/efi/
-RMC_INSTALL_LIBS_PATH := $(RMC_INSTALL_PREFIX)/lib/
-
-SHARED_OBJS := src/util/util.efi.o
-ALL_OBJS := $(RMCL_OBJ) $(RSMP_OBJ) $(SHARED_OBJS)
+RMC_INSTALL_LIB_PATH := $(RMC_INSTALL_PREFIX)/lib/
 
 CFLAGS := -DRMC_EFI -Wall -O2 -I$(TOPDIR)/inc -fpic -nostdinc -nostdlib  -fno-builtin -std=gnu90 \
 	   -I$(RMC_EFI_HEADER_PREFIX) -I$(RMC_EFI_HEADER_PREFIX)/$(RMC_EFI_ARCH) $(RMC_CFLAGS)
 
-all: librmclefi librsmpefi
+all: librmcefi
 
-$(ALL_OBJS): %.efi.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+$(RMC_LIB_OBJ): %.efi.o: %.c
+	@$(CC) -c $(CFLAGS) $< -o $@
 
-librmclefi: $(RMCL_OBJ) $(SHARED_OBJS)
-	@$(AR) rcs src/rmcl/$@.a $^
-
-librsmpefi: $(RSMP_OBJ) $(SHARED_OBJS)
-	@$(AR) rcs src/rsmp/$@.a $^
+librmcefi: $(RMC_LIB_OBJ)
+	@$(AR) rcs src/lib/$@.a $^
 
 clean:
-	@rm -f $(ALL_OBJS) src/rmcl/librmclefi.a src/rsmp/librsmpefi.a
+	@rm -f $(RMC_LIB_OBJ) src/lib/librmcefi.a
 
-.PHONY: clean librmclefi librsmpefi
+.PHONY: clean librmcefi
 
 install:
 	@mkdir -p $(RMC_INSTALL_HEADER_PATH)
-	@for each in $(RMC_INSTALL_HEADERS); do \
-		install -m 644 $$each $(RMC_INSTALL_HEADER_PATH); done
-	@mkdir -p $(RMC_INSTALL_LIBS_PATH)
-	@for each in $(RMC_INSTALL_LIBS); do \
-		install -m 644 $$each $(RMC_INSTALL_LIBS_PATH); done
+	@install -m 644 $(RMC_INSTALL_HEADERS) $(RMC_INSTALL_HEADER_PATH)
+	@mkdir -p $(RMC_INSTALL_LIB_PATH)
+	@install -m 644 $(RMC_INSTALL_LIBS) $(RMC_INSTALL_LIB_PATH)

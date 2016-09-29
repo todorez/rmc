@@ -5,42 +5,43 @@ TOPDIR = $(shell if [ -z "$$PWD" ]; then pwd; else echo "$$PWD"; fi)
 RMC_TOOL_SRC := $(wildcard src/*.c)
 RMC_TOOL_OBJ := $(patsubst %.c,%.o,$(RMC_TOOL_SRC))
 
-RMCL_SRC :=$(wildcard src/rmcl/*.c)
-RMCL_OBJ := $(patsubst %.c,%.o,$(RMCL_SRC))
+RMC_LIB_SRC := $(wildcard src/lib/common/*.c)
+RMC_LIB_OBJ := $(patsubst %.c,%.o,$(RMC_LIB_SRC))
 
-RSMP_SRC :=$(wildcard src/rsmp/*.c)
-RSMP_OBJ := $(patsubst %.c,%.o,$(RSMP_SRC))
+RMC_INSTALL_HEADERS := inc/rmcl.h inc/rsmp.h
 
-ifeq ($(strip $(RMC_INSTALL_PREFIX)),)
 RMC_INSTALL_PREFIX := /usr
-endif
 
 RMC_INSTALL_BIN_PATH := $(RMC_INSTALL_PREFIX)/bin/
 
-ALL_OBJS := $(RMC_TOOL_OBJ) $(RMCL_OBJ) $(RSMP_OBJ)
+RMC_INSTALL_LIB_PATH := $(RMC_INSTALL_PREFIX)/lib/
+
+RMC_INSTALL_HEADER_PATH := $(RMC_INSTALL_PREFIX)/include/
+
+ALL_OBJS := $(RMC_TOOL_OBJ) $(RMC_LIB_OBJ)
 
 CFLAGS := -Wall -O2 -I$(TOPDIR)/inc $(RMC_CFLAGS)
 
-all: rmc librmcl librsmp
+all: rmc
 
 $(ALL_OBJS): %.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) $< -o $@
 
-librmcl: $(RMCL_OBJ)
-	@$(AR) rcs src/rmcl/$@.a $<
+librmc: $(RMC_LIB_OBJ)
+	@$(AR) rcs src/lib/$@.a $^
 
-librsmp: $(RSMP_OBJ)
-	@$(AR) rcs src/rsmp/$@.a $<
-
-rmc: $(RMC_TOOL_OBJ) librsmp librmcl
-	$(CC) $(CFLAGS) -Lsrc/rsmp -Lsrc/rmcl -lrsmp -lrmcl $(RMC_TOOL_OBJ) src/rmcl/librmcl.a src/rsmp/librsmp.a -o src/$@
+rmc: $(RMC_TOOL_OBJ) librmc
+	@$(CC) $(CFLAGS) -Lsrc/lib/ -lrmc $(RMC_TOOL_OBJ) src/lib/librmc.a -o src/$@
 
 clean:
-	@rm -f $(ALL_OBJS) src/rmc src/rmcl/librmcl.a src/rsmp/librsmp.a
+	@rm -f $(ALL_OBJS) src/rmc src/lib/librmc.a
 
-.PHONY: clean rmc librmcl librsmp
+.PHONY: clean rmc librmc
 
-# Only install RMC tool in user space build, no librmcl, librsmp and headers.
 install:
 	@mkdir -p $(RMC_INSTALL_BIN_PATH)
 	@install -m 755 src/rmc $(RMC_INSTALL_BIN_PATH)
+	@mkdir -p $(RMC_INSTALL_LIB_PATH)
+	@install -m 644 src/lib/librmc.a $(RMC_INSTALL_LIB_PATH)
+	@mkdir -p $(RMC_INSTALL_HEADER_PATH)
+	@install -m 644 $(RMC_INSTALL_HEADERS) $(RMC_INSTALL_HEADER_PATH)
