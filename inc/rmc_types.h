@@ -7,14 +7,17 @@
 #define INC_RMC_TYPES_H_
 
 #ifndef RMC_EFI
+#include <sys/types.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
 #else
 #include <efi.h>
-/* Fixme: we define (s)size_t here for both 32 and 64 bit because gnu-efi doesn't provide these */
-typedef uint64_t size_t;
-typedef uint64_t ssize_t;
+/* we specify -nostdinc in C flag and provide these in rmc
+ * for EFI applications that don't want to use standard headers.
+ */
+typedef unsigned long size_t;
+typedef long ssize_t;
 #endif
 
 typedef uint8_t BYTE;
