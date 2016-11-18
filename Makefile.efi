@@ -13,12 +13,12 @@ RMC_INSTALL_PREFIX := /usr
 
 RMC_INSTALL_LIB_PATH := $(RMC_INSTALL_PREFIX)/lib/
 
-CFLAGS := -DRMC_EFI -Wall -O2 -I$(TOPDIR)/inc -fpic -nostdinc -nostdlib  -fno-builtin -std=gnu90 $(RMC_CFLAGS)
+RMC_CFLAGS := -DRMC_EFI -Wall -I$(TOPDIR)/inc -fpic -nostdinc -nostdlib  -fno-builtin -std=gnu90
 
 all: librmcefi
 
 $(RMC_LIB_OBJ): %.efi.o: %.c
-	@$(CC) -c $(CFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) $(RMC_CFLAGS) $< -o $@
 
 librmcefi: $(RMC_LIB_OBJ)
 	@$(AR) rcs src/lib/$@.a $^

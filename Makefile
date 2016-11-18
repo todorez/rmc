@@ -20,18 +20,18 @@ RMC_INSTALL_HEADER_PATH := $(RMC_INSTALL_PREFIX)/include/rmc/
 
 ALL_OBJS := $(RMC_TOOL_OBJ) $(RMC_LIB_OBJ)
 
-CFLAGS := -Wall -O2 -I$(TOPDIR)/inc $(RMC_CFLAGS)
+RMC_CFLAGS := -Wall -I$(TOPDIR)/inc
 
 all: rmc
 
 $(ALL_OBJS): %.o: %.c
-	@$(CC) -c $(CFLAGS) $< -o $@
+	@$(CC) -c $(CFLAGS) $(RMC_CFLAGS) $< -o $@
 
 librmc: $(RMC_LIB_OBJ)
 	@$(AR) rcs src/lib/$@.a $^
 
 rmc: $(RMC_TOOL_OBJ) librmc
-	@$(CC) $(CFLAGS) -Lsrc/lib/ -lrmc $(RMC_TOOL_OBJ) src/lib/librmc.a -o src/$@
+	@$(CC) $(CFLAGS) $(RMC_CFLAGS) -Lsrc/lib/ -lrmc $(RMC_TOOL_OBJ) src/lib/librmc.a -o src/$@
 
 clean:
 	@rm -f $(ALL_OBJS) src/rmc src/lib/librmc.a
