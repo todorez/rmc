@@ -17,33 +17,33 @@
 typedef union smbios_ep {
     /* */
     struct {
-        BYTE ep_anchor[4];
-        BYTE ep_chksum;
-        BYTE ep_len;
-        BYTE major_ver;
-        BYTE minor_ver;
-        WORD max_struct_size;
-        BYTE ep_rev;
-        BYTE fmt_area[5];
-        BYTE interm_anchor[5];
-        BYTE interm_chksum;
-        WORD struct_tbl_len;
-        DWORD struct_tbl_addr;
-        WORD struct_num;
-        BYTE bcd_rev;
+        rmc_uint8_t ep_anchor[4];
+        rmc_uint8_t ep_chksum;
+        rmc_uint8_t ep_len;
+        rmc_uint8_t major_ver;
+        rmc_uint8_t minor_ver;
+        rmc_uint16_t max_struct_size;
+        rmc_uint8_t ep_rev;
+        rmc_uint8_t fmt_area[5];
+        rmc_uint8_t interm_anchor[5];
+        rmc_uint8_t interm_chksum;
+        rmc_uint16_t struct_tbl_len;
+        rmc_uint32_t struct_tbl_addr;
+        rmc_uint16_t struct_num;
+        rmc_uint8_t bcd_rev;
     } ep_32;
 
     struct {
-        BYTE ep_anchor[5];
-        BYTE ep_chksum;
-        BYTE ep_len;
-        BYTE major_ver;
-        BYTE minor_ver;
-        BYTE doc_rev;
-        BYTE ep_rev;
-        BYTE reserved;
-        DWORD max_struct_size;
-        QWORD struct_tbl_addr;
+        rmc_uint8_t ep_anchor[5];
+        rmc_uint8_t ep_chksum;
+        rmc_uint8_t ep_len;
+        rmc_uint8_t major_ver;
+        rmc_uint8_t minor_ver;
+        rmc_uint8_t doc_rev;
+        rmc_uint8_t ep_rev;
+        rmc_uint8_t reserved;
+        rmc_uint32_t max_struct_size;
+        rmc_uint64_t struct_tbl_addr;
 
     } ep_64;
 } __attribute__ ((__packed__)) smbios_ep_t;
@@ -52,9 +52,9 @@ typedef union smbios_ep {
  * SMBIOS structure header
  */
 typedef struct smbios_struct_hdr {
-    BYTE type;
-    BYTE len;
-    WORD handle;
+    rmc_uint8_t type;
+    rmc_uint8_t len;
+    rmc_uint16_t handle;
 }  __attribute__ ((__packed__)) smbios_struct_hdr_t;
 
 
@@ -70,7 +70,7 @@ typedef struct smbios_struct_hdr {
  *
  * retrun: 0 for success; non-zero for failures
  */
-extern int rsmp_get_smbios_strcut(uint8_t *start, uint64_t *struct_addr, uint16_t *struct_len);
+extern int rsmp_get_smbios_strcut(rmc_uint8_t *start, rmc_uint64_t *struct_addr, rmc_uint16_t *struct_len);
 
 /*
  * get board RMC fingerprint from smbios structure tabe (not entry table)
@@ -80,6 +80,6 @@ extern int rsmp_get_smbios_strcut(uint8_t *start, uint64_t *struct_addr, uint16_
  *
  * return: retrun: 0 for success; non-zero for failures
  */
-extern int rsmp_get_fingerprint_from_smbios_struct(BYTE *addr, rmc_fingerprint_t *fp);
+extern int rsmp_get_fingerprint_from_smbios_struct(rmc_uint8_t *addr, rmc_fingerprint_t *fp);
 
 #endif /* INC_RSMP_H_ */

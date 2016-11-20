@@ -122,8 +122,8 @@ typedef enum read_fingerprint_state {
  */
 static int read_fingerprint_from_file(const char* pathname, rmc_fingerprint_t *fp, void **raw) {
     char *file = NULL;
-    size_t len = 0;
-    size_t idx = 0;
+    rmc_size_t len = 0;
+    rmc_size_t idx = 0;
     int i = 0;
     int ret = 1;
     read_fingerprint_state_t state = TYPE;
@@ -221,7 +221,7 @@ read_fp_done:
  */
 static rmc_file_t *read_policy_file(char *pathname, int type) {
     rmc_file_t *tmp = NULL;
-    size_t policy_len = 0;
+    rmc_size_t policy_len = 0;
     int ret;
     char *path_token;
 
@@ -309,7 +309,7 @@ static rmc_record_file_t *read_record_file(char *pathname) {
 int main(int argc, char **argv){
 
     int c;
-    uint16_t options = 0;
+    rmc_uint16_t options = 0;
     char *output_path = NULL;
     /* -C and -d could be present in a single command, with different database files specified.  */
     char *input_db_path_cap_c = NULL;
@@ -323,9 +323,9 @@ int main(int argc, char **argv){
     rmc_file_t *policy_files = NULL;
     rmc_record_file_t *record_files = NULL;
     void *raw_fp = NULL;
-    BYTE *db = NULL;
-    BYTE *db_c = NULL;
-    BYTE *db_d = NULL;
+    rmc_uint8_t *db = NULL;
+    rmc_uint8_t *db_c = NULL;
+    rmc_uint8_t *db_d = NULL;
     int ret = 1;
     int i;
     int arg_num = 0;
@@ -437,7 +437,7 @@ int main(int argc, char **argv){
 
     /* sanity check for -o */
     if (options & RMC_OPT_O) {
-        uint16_t opt_o = options & (RMC_OPT_CAP_D | RMC_OPT_CAP_R | RMC_OPT_CAP_F | RMC_OPT_CAP_B);
+        rmc_uint16_t opt_o = options & (RMC_OPT_CAP_D | RMC_OPT_CAP_R | RMC_OPT_CAP_F | RMC_OPT_CAP_B);
         if (!(opt_o)) {
             fprintf(stderr, "\nWRONG: Option -o cannot be applied without -B, -D, -R or -F\n\n");
             usage();
@@ -466,7 +466,7 @@ int main(int argc, char **argv){
     /* get cmdline */
     if (options & RMC_OPT_CAP_C) {
 
-        size_t db_len = 0;
+        rmc_size_t db_len = 0;
         rmc_fingerprint_t fp;
         rmc_file_t cmd_policy;
 
@@ -519,7 +519,7 @@ int main(int argc, char **argv){
         int record_idx = 0;
         rmc_record_file_t *record = NULL;
         rmc_record_file_t *current_record = NULL;
-        size_t db_len = 0;
+        rmc_size_t db_len = 0;
 
         /* if user doesn't provide pathname for output database, set a default value */
         if (output_path == NULL)

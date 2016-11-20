@@ -17,13 +17,13 @@
 #define EFI_SYSTAB_PATH "/sys/firmware/efi/systab"
 #define SYSTAB_LEN 4096         /* assume 4kb is enough...*/
 
-int read_file(const char *pathname, char **data, size_t* len) {
+int read_file(const char *pathname, char **data, rmc_size_t* len) {
     int fd = -1;
     struct stat s;
     off_t total = 0;
     void *buf = NULL;
-    size_t byte = 0;
-    ssize_t tmp = 0;
+    rmc_size_t byte = 0;
+    rmc_ssize_t tmp = 0;
 
     *data = NULL;
     *len = 0;
@@ -55,7 +55,7 @@ int read_file(const char *pathname, char **data, size_t* len) {
             return 1;
         }
 
-        byte += (size_t)tmp;
+        byte += (rmc_size_t)tmp;
     }
 
     *data = buf;
@@ -65,10 +65,10 @@ int read_file(const char *pathname, char **data, size_t* len) {
     return 0;
 }
 
-int write_file(const char *pathname, void *data, size_t len, int append) {
+int write_file(const char *pathname, void *data, rmc_size_t len, int append) {
     int fd = -1;
-    ssize_t tmp = 0;
-    size_t total = 0;
+    rmc_ssize_t tmp = 0;
+    rmc_size_t total = 0;
     int open_flag = O_WRONLY|O_CREAT;
 
     if (!data || !pathname)
@@ -85,13 +85,13 @@ int write_file(const char *pathname, void *data, size_t len, int append) {
     }
 
     while (total < len) {
-        if ((tmp = write(fd, (BYTE *)data + total, len - total)) < 0) {
+        if ((tmp = write(fd, (rmc_uint8_t *)data + total, len - total)) < 0) {
             perror("rmc: failed to write file");
             close(fd);
             return 1;
         }
 
-        total += (size_t)tmp;
+        total += (rmc_size_t)tmp;
     }
 
     close(fd);
@@ -103,7 +103,7 @@ int write_file(const char *pathname, void *data, size_t len, int append) {
  * Read smbios entry table address from sysfs
  * return 0 when success
  */
-static int get_smbios_entry_table_addr(uint64_t* addr){
+static int get_smbios_entry_table_addr(rmc_uint64_t* addr){
 
     char *entry_buf = NULL;
     char *tmp;
@@ -166,17 +166,17 @@ void rmc_free_file(rmc_file_t *file) {
 int rmc_get_fingerprint(rmc_fingerprint_t *fp) {
 
     int fd = -1;
-    uint64_t entry_addr = 0;
-    uint8_t *smbios_entry_map = NULL;
+    rmc_uint64_t entry_addr = 0;
+    rmc_uint8_t *smbios_entry_map = NULL;
     long pg_size = 0;
     long pg_num = 0;
-    uint8_t *smbios_entry_start = NULL;
-    size_t entry_map_len = 0;
-    size_t struct_map_len = 0;
-    WORD smbios_struct_len = 0;
-    uint64_t smbios_struct_addr = 0;
-    uint8_t *smbios_struct_map = NULL;
-    uint8_t *smbios_struct_start = NULL;
+    rmc_uint8_t *smbios_entry_start = NULL;
+    rmc_size_t entry_map_len = 0;
+    rmc_size_t struct_map_len = 0;
+    rmc_uint16_t smbios_struct_len = 0;
+    rmc_uint64_t smbios_struct_addr = 0;
+    rmc_uint8_t *smbios_struct_map = NULL;
+    rmc_uint8_t *smbios_struct_start = NULL;
     int ret = 1;
     int i;
     int j;
@@ -271,10 +271,10 @@ err:
 }
 
 int rmc_query_file_by_fp(rmc_fingerprint_t *fp, char *db_pathname, char *file_name, rmc_file_t *file) {
-    BYTE *db = NULL;
-    size_t db_len = 0;
+    rmc_uint8_t *db = NULL;
+    rmc_size_t db_len = 0;
     int ret = 1;
-    BYTE *blob = NULL;
+    rmc_uint8_t *blob = NULL;
 
     /* ToDo: We should use file seeking when traversing a database
      * file instead of load whole DB into mem.

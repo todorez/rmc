@@ -6,9 +6,10 @@
  * configuration table to get SMBIOS data.
  *
  * We don't want to bring such dependency for rmc's sake to a
- * client which is based on a different EFI implementation.
+ * client which is based on a different EFI implementation or
+ * compile setup.
  *
- * We have to be more self-contained at this point...
+ * This header file shall be internally used in rmc.
  */
 
 #ifndef INC_RMC_EFI_H_
@@ -17,33 +18,33 @@
 #ifdef RMC_EFI
 #include <rmc_types.h>
 
-typedef unsigned long int UINTN;
-typedef uint64_t UINT64;
-typedef uint32_t UINT32;
-typedef uint16_t UINT16;
-typedef uint16_t CHAR16;
-typedef uint8_t UINT8;
+typedef unsigned long int rmc_uintn_t;
+typedef rmc_uint64_t rmc_uint64_t;
+typedef rmc_uint32_t rmc_uint32_t;
+typedef rmc_uint16_t rmc_uint16_t;
+typedef rmc_uint16_t rmc_uint16_t;
+typedef rmc_uint8_t rmc_uint8_t;
 
 typedef void * EFI_HANDLE;
 typedef struct {
-    UINT32 d1;
-    UINT16 d2;
-    UINT16 d3;
-    UINT8 d4[8];
+    rmc_uint32_t d1;
+    rmc_uint16_t d2;
+    rmc_uint16_t d3;
+    rmc_uint8_t d4[8];
 } EFI_GUID;
 
-/* Fake place holder for pointers */
+/* Pointers as place holders */
 typedef void * EFI_SIMPLE_TEXT_INPUT_PROTOCOL_P;
 typedef void * EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL_P;
 typedef void * EFI_RUNTIME_SERVICES_P;
 typedef void * EFI_BOOT_SERVICES_P;
 
 typedef struct {
-    UINT64 Signature;
-    UINT32 Revision;
-    UINT32 HeaderSize;
-    UINT32 CRC32;
-    UINT32 Reserved;
+    rmc_uint64_t Signature;
+    rmc_uint32_t Revision;
+    rmc_uint32_t HeaderSize;
+    rmc_uint32_t CRC32;
+    rmc_uint32_t Reserved;
 } EFI_TABLE_HEADER;
 
 typedef struct {
@@ -53,8 +54,8 @@ typedef struct {
 
 typedef struct {
     EFI_TABLE_HEADER Hdr;
-    CHAR16 *FirmwareVendor;
-    UINT32 FirmwareRevision;
+    rmc_uint16_t *FirmwareVendor;
+    rmc_uint32_t FirmwareRevision;
     EFI_HANDLE ConsoleInHandle;
     EFI_SIMPLE_TEXT_INPUT_PROTOCOL_P ConIn;
     EFI_HANDLE ConsoleOutHandle;
@@ -63,7 +64,7 @@ typedef struct {
     EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL_P StdErr;
     EFI_RUNTIME_SERVICES_P RuntimeServices;
     EFI_BOOT_SERVICES_P *BootServices;
-    UINTN NumberOfTableEntries;
+    rmc_uintn_t NumberOfTableEntries;
     EFI_CONFIGURATION_TABLE *ConfigurationTable;
 } EFI_SYSTEM_TABLE;
 #endif

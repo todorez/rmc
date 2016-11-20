@@ -96,7 +96,7 @@ extern void rmc_free_file(rmc_file_t *fp);
  *
  * return           : 0 for success, non-zeor for failures
  */
-extern int read_file(const char *pathname, char **data, size_t* len);
+extern int read_file(const char *pathname, char **data, rmc_size_t* len);
 
 /*
  * utility function to write data into file.
@@ -107,7 +107,7 @@ extern int read_file(const char *pathname, char **data, size_t* len);
  *
  * return          : 0 when successfully write all data into file, non-zeor for failures
  */
-int write_file(const char *pathname, void *data, size_t len, int append);
+int write_file(const char *pathname, void *data, rmc_size_t len, int append);
 
 #else
 /* 2 - API for UEFI context */

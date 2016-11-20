@@ -28,8 +28,8 @@
  * preferred as long as possible.
  */
 typedef struct rmc_finger {
-    BYTE type;
-    BYTE offset;
+    rmc_uint8_t type;
+    rmc_uint8_t offset;
     char *name;
     char *value;
 } rmc_finger_t;
@@ -79,14 +79,14 @@ static __inline__ void initialize_fingerprint(rmc_fingerprint_t *fp) {
  * RMC Database (packed). A RMC DB contains records
  */
 typedef struct rmc_db_header {
-    BYTE signature[RMC_DB_SIG_LEN];
-    BYTE version;
-    QWORD length;
+    rmc_uint8_t signature[RMC_DB_SIG_LEN];
+    rmc_uint8_t version;
+    rmc_uint64_t length;
 } __attribute__ ((__packed__)) rmc_db_header_t;
 
 /* signature is the computation result of fingerprint and what's packed in record */
 typedef union rmc_signature {
-    BYTE raw[32];
+    rmc_uint8_t raw[32];
 } __attribute__ ((__packed__)) rmc_signature_t;
 
 /*
@@ -94,17 +94,17 @@ typedef union rmc_signature {
  */
 typedef struct rmc_record_header {
     rmc_signature_t signature;     /* computation result from finger print */
-    QWORD length;
+    rmc_uint64_t length;
 } __attribute__ ((__packed__)) rmc_record_header_t;
 
 /*
  * RMC Database Meta (packed)
  */
 typedef struct rmc_meta_header {
-    BYTE type;      /* type 0 command line; type 1 file blob*/
-    QWORD length;   /* covers cmdline_filename and blob blocks. */
+    rmc_uint8_t type;      /* type 0 command line; type 1 file blob*/
+    rmc_uint64_t length;   /* covers cmdline_filename and blob blocks. */
     /* char *cmdline_filename : Invisible, null-terminated string packed in mem */
-    /* BYTE *blob : Invisible, binary packed in mem */
+    /* rmc_uint8_t *blob : Invisible, binary packed in mem */
 } __attribute__ ((__packed__)) rmc_meta_header_t;
 
 /*
@@ -114,11 +114,11 @@ typedef struct rmc_meta_header {
 #define RMC_POLICY_CMDLINE 0
 #define RMC_POLICY_BLOB 1
 typedef struct rmc_file {
-    BYTE type;              /* RMC_POLICY_CMDLINE or RMC_POLICY_BLOB*/
+    rmc_uint8_t type;              /* RMC_POLICY_CMDLINE or RMC_POLICY_BLOB*/
     char *cmdline_name;     /* file name of blob (type 1) or command line fragment (type 0) */
     struct rmc_file *next;  /* next rmc file, or null as terminator for the last element */
-    size_t blob_len;         /* number of bytes of blob, excluding length of name */
-    BYTE *blob;             /* blob of policy file, treated as binary, UNNECESSARILY Null terminated */
+    rmc_size_t blob_len;         /* number of bytes of blob, excluding length of name */
+    rmc_uint8_t *blob;             /* blob of policy file, treated as binary, UNNECESSARILY Null terminated */
 } rmc_file_t;
 
 /*
@@ -126,8 +126,8 @@ typedef struct rmc_file {
  * Also as input when generating rmc db with records.
  */
 typedef struct rmc_record_file {
-    BYTE *blob;              /* record raw data blob */
-    size_t length;
+    rmc_uint8_t *blob;              /* record raw data blob */
+    rmc_size_t length;
     struct rmc_record_file *next;  /* next rmc record file, or null as terminator for the last element */
 } rmc_record_file_t;
 
@@ -150,7 +150,7 @@ extern int rmcl_generate_record(rmc_fingerprint_t *fingerprint, rmc_file_t *poli
  * (out) len            : length of returned rmc db
  * (ret) 0 for success, RMC error code for failures. content of rmc_db is NULL for failures.
  */
-extern int rmcl_generate_db(rmc_record_file_t *record_files, BYTE **rmc_db, size_t *len);
+extern int rmcl_generate_db(rmc_record_file_t *record_files, rmc_uint8_t **rmc_db, rmc_size_t *len);
 
 /*
  * Query a RMC database blob provided by caller, to get kernel command line fragment or a policy file blob.
@@ -165,6 +165,6 @@ extern int rmcl_generate_db(rmc_record_file_t *record_files, BYTE **rmc_db, size
  * return               : 0 when rmcl found a meta in record which has matched signature of fingerprint. non-zero for failures. Content of
  *                        policy is not determined when non-zero is returned.
  */
-extern int query_policy_from_db(rmc_fingerprint_t *fingerprint, BYTE *rmc_db, BYTE type, char *blob_name, rmc_file_t *policy);
+extern int query_policy_from_db(rmc_fingerprint_t *fingerprint, rmc_uint8_t *rmc_db, rmc_uint8_t type, char *blob_name, rmc_file_t *policy);
 
 #endif /* INC_RMCL_H_ */

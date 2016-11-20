@@ -32,7 +32,7 @@ static int compare_guid (EFI_GUID *guid1, EFI_GUID *guid2) {
 
 static void *get_smbios_entry(void * sys_config_table) {
     EFI_SYSTEM_TABLE *systab = (EFI_SYSTEM_TABLE *)sys_config_table;
-    UINTN i;
+    rmc_uintn_t i;
     EFI_CONFIGURATION_TABLE *entry;
 
     if (!systab)
@@ -51,8 +51,9 @@ static void *get_smbios_entry(void * sys_config_table) {
 
 int rmc_get_fingerprint(void *sys_table, rmc_fingerprint_t *fp) {
     void *smbios_entry = NULL;
-    UINT64 smbios_struct_addr = 0;
-    UINT16 smbios_struct_len = 0;
+    rmc_uint64_t smbios_struct_addr = 0;
+    rmc_uint16_t smbios_struct_len = 0;
+    rmc_uint8_t *smbios_struct_start = NULL;
 
     if (!fp)
         return 1;
@@ -65,14 +66,17 @@ int rmc_get_fingerprint(void *sys_table, rmc_fingerprint_t *fp) {
     if (rsmp_get_smbios_strcut(smbios_entry, &smbios_struct_addr, &smbios_struct_len))
         return 1;
 
-    return rsmp_get_fingerprint_from_smbios_struct((BYTE *)smbios_struct_addr, fp);
+    /* To avoid compiler warning for 32 bit build */
+    smbios_struct_start += smbios_struct_addr;
+
+    return rsmp_get_fingerprint_from_smbios_struct(smbios_struct_start, fp);
 }
 
-int rmc_query_file_by_fp(rmc_fingerprint_t *fp, BYTE *db_blob, char *file_name, rmc_file_t *file) {
+int rmc_query_file_by_fp(rmc_fingerprint_t *fp, rmc_uint8_t *db_blob, char *file_name, rmc_file_t *file) {
     return query_policy_from_db(fp, db_blob, RMC_POLICY_BLOB, file_name, file);
 }
 
-int rmc_gimme_file(void *sys_table, BYTE *db_blob, char *file_name, rmc_file_t *file) {
+int rmc_gimme_file(void *sys_table, rmc_uint8_t *db_blob, char *file_name, rmc_file_t *file) {
     rmc_fingerprint_t fp;
 
     if (!sys_table || !db_blob || !file_name || !file)
