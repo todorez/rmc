@@ -73,7 +73,7 @@ int rmc_get_fingerprint(void *sys_table, rmc_fingerprint_t *fp) {
 }
 
 int rmc_query_file_by_fp(rmc_fingerprint_t *fp, rmc_uint8_t *db_blob, char *file_name, rmc_file_t *file) {
-    return query_policy_from_db(fp, db_blob, RMC_POLICY_BLOB, file_name, file);
+    return query_policy_from_db(fp, db_blob, RMC_GENERIC_FILE, file_name, file);
 }
 
 int rmc_gimme_file(void *sys_table, rmc_uint8_t *db_blob, char *file_name, rmc_file_t *file) {

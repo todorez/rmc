@@ -282,12 +282,12 @@ int rmc_query_file_by_fp(rmc_fingerprint_t *fp, char *db_pathname, char *file_na
      * read rmc database file
      */
     if (read_file(db_pathname, (char **)&db, &db_len)) {
-        fprintf(stderr, "Failed to read database file for command line\n\n");
+        fprintf(stderr, "Failed to read database file\n\n");
         return ret;
     }
 
     /* query policy in database */
-    if(query_policy_from_db(fp, db, RMC_POLICY_BLOB, file_name, file))
+    if(query_policy_from_db(fp, db, RMC_GENERIC_FILE, file_name, file))
         goto free_db;
 
     /* the returned file blob is actually in db memory region,

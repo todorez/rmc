@@ -101,23 +101,20 @@ typedef struct rmc_record_header {
  * RMC Database Meta (packed)
  */
 typedef struct rmc_meta_header {
-    rmc_uint8_t type;      /* type 0 command line; type 1 file blob*/
-    rmc_uint64_t length;   /* covers cmdline_filename and blob blocks. */
-    /* char *cmdline_filename : Invisible, null-terminated string packed in mem */
+    rmc_uint8_t type;      /* RMC_GENERIC_FILE or or any other types defined later */
+    rmc_uint64_t length;   /* length of blob's name and blob */
+    /* char *blob_name : Invisible, null-terminated string packed in mem */
     /* rmc_uint8_t *blob : Invisible, binary packed in mem */
 } __attribute__ ((__packed__)) rmc_meta_header_t;
 
-/*
- * input of a rmc policy file. RMCL accepts command line
- * and file blobs presented in this data type (sparse memory)
- */
-#define RMC_POLICY_CMDLINE 0
-#define RMC_POLICY_BLOB 1
+/* We only have one type now but keep a type field internally for extensions in the future. */
+#define RMC_GENERIC_FILE 1
+
 typedef struct rmc_file {
-    rmc_uint8_t type;              /* RMC_POLICY_CMDLINE or RMC_POLICY_BLOB*/
-    char *cmdline_name;     /* file name of blob (type 1) or command line fragment (type 0) */
-    struct rmc_file *next;  /* next rmc file, or null as terminator for the last element */
-    rmc_size_t blob_len;         /* number of bytes of blob, excluding length of name */
+    rmc_uint8_t type;              /* RMC_GENERIC_FILE or or any other types defined later */
+    char *blob_name;               /* name of blob for type RMC_GENERIC_FILE */
+    struct rmc_file *next;         /* next rmc file, or null as terminator for the last element */
+    rmc_size_t blob_len;           /* number of bytes of blob, excluding length of name */
     rmc_uint8_t *blob;             /* blob of policy file, treated as binary, UNNECESSARILY Null terminated */
 } rmc_file_t;
 
@@ -153,11 +150,11 @@ extern int rmcl_generate_record(rmc_fingerprint_t *fingerprint, rmc_file_t *poli
 extern int rmcl_generate_db(rmc_record_file_t *record_files, rmc_uint8_t **rmc_db, rmc_size_t *len);
 
 /*
- * Query a RMC database blob provided by caller, to get kernel command line fragment or a policy file blob.
+ * Query a RMC database blob provided by caller
  * (in) fingerprint     : fingerprint of board
  * (in) rmc_db          : rmc database blob
  * (in) type            : type of record
- * (in) blob_name       : name of file blob to query. Ignored when type is 0 (cmdline)
+ * (in) blob_name       : name of file blob to query
  * (out) policy         : policy file data structure provided by caller, holding returned policy data
  *                        if there is a matched meta for board. Pointer members of policy hold data location
  *                        in rmc_db's memory region. (This functions doesn't copy data.)

@@ -77,10 +77,8 @@ int rmcl_generate_record(rmc_fingerprint_t *fingerprint, rmc_file_t *policy_file
 
     /* Calculate total length of record for memory allocation */
     while (tmp) {
-        /* for type 0 cmdline, don't take blob len into account */
-        record_len += sizeof(rmc_meta_header_t) + strlen(tmp->cmdline_name) + 1;
-        if (tmp->type != RMC_POLICY_CMDLINE)
-            record_len += tmp->blob_len;
+        record_len += sizeof(rmc_meta_header_t) + strlen(tmp->blob_name) + 1;
+        record_len += tmp->blob_len;
         tmp = tmp->next;
     }
 
@@ -111,18 +109,15 @@ int rmcl_generate_record(rmc_fingerprint_t *fingerprint, rmc_file_t *policy_file
         meta->length = sizeof(rmc_meta_header_t);
         idx += sizeof(rmc_meta_header_t);
 
-        cmd_len = strlen(tmp->cmdline_name) + 1;
+        cmd_len = strlen(tmp->blob_name) + 1;
 
-        memcpy(idx, tmp->cmdline_name, cmd_len);
+        memcpy(idx, tmp->blob_name, cmd_len);
         idx += cmd_len;
         meta->length += cmd_len;
+        memcpy(idx, tmp->blob, tmp->blob_len);
+        idx += tmp->blob_len;
+        meta->length += tmp->blob_len;
 
-        /* only pack blob in when policy is not cmdline fragment */
-        if (tmp->type != RMC_POLICY_CMDLINE) {
-            memcpy(idx, tmp->blob, tmp->blob_len);
-            idx += tmp->blob_len;
-            meta->length += tmp->blob_len;
-        }
         tmp = tmp->next;
     }
 
@@ -210,7 +205,7 @@ int query_policy_from_db(rmc_fingerprint_t *fingerprint, rmc_uint8_t *rmc_db, rm
     if (!fingerprint || !rmc_db || !policy)
         return 1;
 
-    if (type != RMC_POLICY_CMDLINE && blob_name == NULL)
+    if (type != RMC_GENERIC_FILE || blob_name == NULL)
         return 1;
 
     db_header = (rmc_db_header_t *)rmc_db;
@@ -241,16 +236,7 @@ int query_policy_from_db(rmc_fingerprint_t *fingerprint, rmc_uint8_t *rmc_db, rm
 
                     policy_idx = meta_idx + sizeof(rmc_meta_header_t);
 
-                    /* set fields common among types */
-                    if (type == RMC_POLICY_CMDLINE) {
-                        policy->next = NULL;
-                        policy->type = type;
-                        policy->blob_len = 0;
-                        policy->blob = NULL;
-                        policy->cmdline_name = (char *)&rmc_db[policy_idx];
-
-                        return 0;
-                    } else if (type == RMC_POLICY_BLOB && !strncmp(blob_name, (char *)&rmc_db[policy_idx], strlen(blob_name) + 1)) {
+                    if (!strncmp(blob_name, (char *)&rmc_db[policy_idx], strlen(blob_name) + 1)) {
                         rmc_ssize_t cmd_name_len = strlen((char *)&rmc_db[policy_idx]) + 1;
                         policy->blob = &rmc_db[policy_idx + cmd_name_len];
                         policy->blob_len = meta_header.length - sizeof(rmc_meta_header_t) - cmd_name_len;
