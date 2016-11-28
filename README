@@ -51,39 +51,49 @@ Build:
 To build libraries and RMC tool for user space, run:
  make
 
-To build 64-bit libraries for UEFI context, run:
- RMC_EFI_ARCH=x86_64 make -f Makefile.efi
+To build libraries for UEFI context, run:
+ make -f Makefile.efi
 
-To build 32-bit libraries for UEFI context, run:
- RMC_EFI_ARCH=ia32 make -f Makefile.efi
-
-RMC_CFLAGS can be used to pass extra flags.
+Installation:
+ make install
+ make -f Makefile.efi install
 
 To get usage of RMC tool, just compile the project and run "rmc" without any
 arguments. Examples are also provided in usage message, in a rough order of
 recommended workflow.
 
-Refer to rmcl.h and rsmp.h for APIs. RMC tool itself uses these APIs, so it can
-be a good example (rmc.c).
-
 To integrate RMC into a build system (Yocto, Android...):
 On build host, compile RMC tool for host architecture and use it to generate RMC
 database files with all fingerprints and board-specific data checked in source
 tree. Build system is responsible to manage fingerprints and data. RMC database
-files shall be available in live-boot or installer image.
+files shall be deployed in live-boot or installer image.
 
-For target, compile RMC tool and libraries again for target architecture. RMC
-tool, an executable, can be deployed to target for clients like scripts. RMC
-libraries are expected to be linked in programs.
+Compiled and deployed onto target, RMC tool, an executable "rmc", is for clients
+like scripts. RMC libraries and APIs are provided for client programs running in
+EFI context and Linux user space. API and documentation can be found in rmc_api.h.
+A single library, librmc.a in Linux or librmcefi.a in EFI, is provided to clients
+in each supported context.
 
-Further refactor work is planned to simplify the integration
-between RMC and other software clients.
+We could provide sample code using APIs and libraries in the future.
 
 =====
 Requirements
 =====
 Board is required to have UEFI and SMBIOS compliant firmware. The efi driver in
 Linux kernel is also necessary.
+
+RMC so far is limited to 32 and 64 bit X86 architectures. Considering the
+specifications RMC is based on actually support other non-X86 platforms and no
+special requirements beyond what the specifications defined, rmc could support
+non-X86 EFI platforms with some minimal changes.
+
+The gcc compiler, standard header files and C libraries when compiled in Linux.
+The standard header files, standard C libraries, and an EFI implementation to
+provide low-level services (e.g. gnu-efi), are _not_ required by RMC in EFI
+build.
+
+This design is to keep the simplicity in rmc project and minimize the technical
+debt at client side integrating with RMC.
 
 =====
 Patch submission & Maintenance

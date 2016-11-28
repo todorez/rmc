@@ -1,0 +1,4 @@
+Source code in this directory are core implementation of RMC project. They shall
+be shared with both UEFI and user space contexts, so that we can unify behaviors
+of RMC at runtime across different universes. Consequently, these code shall be
+maintained and changed that way.
