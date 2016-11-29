@@ -25,23 +25,24 @@ RMC_CFLAGS := -Wall -I$(TOPDIR)/inc
 all: rmc
 
 $(ALL_OBJS): %.o: %.c
-	@$(CC) -c $(CFLAGS) $(RMC_CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $(RMC_CFLAGS) $< -o $@
 
 librmc: $(RMC_LIB_OBJ)
-	@$(AR) rcs src/lib/$@.a $^
+	$(AR) rcs src/lib/$@.a $^
 
 rmc: $(RMC_TOOL_OBJ) librmc
-	@$(CC) $(CFLAGS) $(RMC_CFLAGS) -Lsrc/lib/ -lrmc $(RMC_TOOL_OBJ) src/lib/librmc.a -o src/$@
+	$(CC) $(CFLAGS) $(RMC_CFLAGS) -Lsrc/lib/ -lrmc $(RMC_TOOL_OBJ) \
+  src/lib/librmc.a -o src/$@
 
 clean:
-	@rm -f $(ALL_OBJS) src/rmc src/lib/librmc.a
+	rm -f $(ALL_OBJS) src/rmc src/lib/librmc.a
 
 .PHONY: clean rmc librmc
 
 install:
-	@mkdir -p $(RMC_INSTALL_BIN_PATH)
-	@install -m 755 src/rmc $(RMC_INSTALL_BIN_PATH)
-	@mkdir -p $(RMC_INSTALL_LIB_PATH)
-	@install -m 644 src/lib/librmc.a $(RMC_INSTALL_LIB_PATH)
-	@mkdir -p $(RMC_INSTALL_HEADER_PATH)
-	@install -m 644 $(RMC_INSTALL_HEADERS) $(RMC_INSTALL_HEADER_PATH)
+	mkdir -p $(RMC_INSTALL_BIN_PATH)
+	install -m 755 src/rmc $(RMC_INSTALL_BIN_PATH)
+	mkdir -p $(RMC_INSTALL_LIB_PATH)
+	install -m 644 src/lib/librmc.a $(RMC_INSTALL_LIB_PATH)
+	mkdir -p $(RMC_INSTALL_HEADER_PATH)
+	install -m 644 $(RMC_INSTALL_HEADERS) $(RMC_INSTALL_HEADER_PATH)

@@ -18,16 +18,16 @@ RMC_CFLAGS := -DRMC_EFI -Wall -I$(TOPDIR)/inc -fpic -nostdinc -nostdlib  -fno-bu
 all: librmcefi
 
 $(RMC_LIB_OBJ): %.efi.o: %.c
-	@$(CC) -c $(CFLAGS) $(RMC_CFLAGS) $< -o $@
+	$(CC) -c $(CFLAGS) $(RMC_CFLAGS) $< -o $@
 
 librmcefi: $(RMC_LIB_OBJ)
-	@$(AR) rcs src/lib/$@.a $^
+	$(AR) rcs src/lib/$@.a $^
 
 clean:
-	@rm -f $(RMC_LIB_OBJ) src/lib/librmcefi.a
+	rm -f $(RMC_LIB_OBJ) src/lib/librmcefi.a
 
 .PHONY: clean librmcefi
 
 install:
-	@mkdir -p $(RMC_INSTALL_LIB_PATH)
-	@install -m 644 $(RMC_INSTALL_LIBS) $(RMC_INSTALL_LIB_PATH)
+	mkdir -p $(RMC_INSTALL_LIB_PATH)
+	install -m 644 $(RMC_INSTALL_LIBS) $(RMC_INSTALL_LIB_PATH)
