@@ -23,6 +23,8 @@ ALL_OBJS := $(RMC_TOOL_OBJ) $(RMC_LIB_OBJ)
 RMC_CFLAGS := -Wall -I$(TOPDIR)/inc
 
 all: rmc
+debug: RMC_CFLAGS += -DDEBUG -g -O0
+debug: rmc
 
 $(ALL_OBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) $(RMC_CFLAGS) $< -o $@
