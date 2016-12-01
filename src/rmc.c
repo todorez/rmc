@@ -14,43 +14,47 @@
 #include <rmc_api.h>
 
 #define USAGE "RMC (Runtime Machine configuration) Tool\n" \
-    "NOTE: Most of usages require root permission (sudo)\n" \
+    "NOTE: Most of usages require root permission (sudo)\n\n" \
     "rmc -F [-o output_fingerprint]\n" \
     "rmc -R [-f <fingerprint file>] -b <blob file list> [-o output_record]\n" \
     "rmc -D <rmc record file list> [-o output_database]\n" \
-	"rmc -B <name of file blob> -d <rmc database file> -o output_file\n" \
-	"\n" \
-	"-F: generate board rmc fingerprint of board\n" \
-	"-R: generate board rmc record of board with its fingerprint and file blobs.\n" \
-    "-f: fingerprint file to be packed in record, rmc will create a fingerprint for board and use it internally to\n" \
-    "    generate record if -f is missed.\n" \
-    "-b: files to be packed in record\n" \
-	"-G: generate rmc database file with records specified in record file list\n" \
-	"-B: get a flie blob with specified name associated to the board rmc is running on\n" \
-	"-d: database file to be queried\n" \
-	"-o: path and name of output file of a specific command\n" \
-	"\n" \
-    "Examples (Steps in an order to add board support into rmc):\n" \
-    "generate board fingerprint:\n" \
-    "rmc -F\n\n" \
-    "generate a rmc record for the board with two file blobs, output to:\n" \
-    "a specified file:\n" \
-    "rmc -R -f fingerprint -b file_1 file_2 -o my_board.record\n\n" \
-    "generate a rmc database file with records from 3 different boards:\n" \
-    "rmc -D board1_record board2_record board3_record\n\n" \
-    "query a file blob named audio.conf associated to the board rmc is running on in database my_rmc.db and output\n" \
-    "to /tmp/new_audio.conf:\n" \
-    "rmc -B audio.conf -d my_rmc.db -o /tmp/new_audio.conf\n\n"
+    "rmc -B <name of file blob> -d <rmc database file> -o output_file\n\n" \
+  "-F: manage fingerprint file\n" \
+    "\t-o output_file: store RMC fingerprint of current board in output_file\n" \
+  "-R: generate board rmc record of board with its fingerprint and file blobs.\n" \
+    "\t-f intput_file : input fingerprint file to be packed in record\n\n" \
+    "\tNOTE: RMC will create a fingerprint for the board and use it to\n" \
+    "\tgenerate record if an input fingerprint file is not provided.\n\n" \
+    "\t-b: files to be packed in record\n\n" \
+  "-G: generate rmc database file with records specified in record file list\n\n" \
+  "-B: get a file blob with specified name associated to the board rmc is\n" \
+  "running on\n" \
+    "\t-d: database file to be queried\n" \
+    "\t-o: path and name of output file of a specific command\n\n" \
+  "-E: Extract data from fingerprint file and print it to terminal\n" \
+    "\t-f: fingerprint file to extract\n\n" \
+    "Examples (Steps in an order to add board support into rmc):\n\n" \
+    "1. Generate board fingerprint:\n" \
+    "\trmc -F\n\n" \
+    "2. Generate a rmc record for the board with two file blobs and save it\n" \
+    "to a specified file:\n" \
+    "\trmc -R -f fingerprint -b file_1 file_2 -o my_board.record\n\n" \
+    "3. Generate a rmc database file with records from 3 different boards:\n" \
+    "\trmc -D board1_record board2_record board3_record\n\n" \
+    "4. Query a file blob named audio.conf associated to the board rmc is\n" \
+    "running on in database my_rmc.db and output to /tmp/new_audio.conf:\n" \
+    "\trmc -B audio.conf -d my_rmc.db -o /tmp/new_audio.conf\n\n"
 
 
 #define RMC_OPT_CAP_F   (1 << 0)
 #define RMC_OPT_CAP_R   (1 << 1)
 #define RMC_OPT_CAP_D   (1 << 2)
 #define RMC_OPT_CAP_B   (1 << 3)
-#define RMC_OPT_F       (1 << 4)
-#define RMC_OPT_O       (1 << 5)
-#define RMC_OPT_B       (1 << 6)
-#define RMC_OPT_D       (1 << 7)
+#define RMC_OPT_CAP_E   (1 << 4)
+#define RMC_OPT_F       (1 << 5)
+#define RMC_OPT_O       (1 << 6)
+#define RMC_OPT_B       (1 << 7)
+#define RMC_OPT_D       (1 << 8)
 
 static void usage () {
     fprintf(stdout, USAGE);
@@ -78,7 +82,7 @@ static void dump_fingerprint(rmc_fingerprint_t *fp) {
 static int write_fingerprint_file(const char* pathname, rmc_fingerprint_t *fp) {
     int i;
     int first = 0;
-
+    /* TODO - do we need to open/close file multiple times to write each field */
     for (i = 0; i < RMC_FINGER_NUM; i++) {
         if (write_file(pathname, &fp->rmc_fingers[i].type, sizeof(fp->rmc_fingers[i].type), first))
             return 1;
@@ -311,13 +315,16 @@ int main(int argc, char **argv){
     /* parse options */
     opterr = 0;
 
-    while ((c = getopt(argc, argv, "FRD:B:b:f:o:d:")) != -1)
+    while ((c = getopt(argc, argv, "FRED:B:b:f:o:d:")) != -1)
         switch (c) {
         case 'F':
             options |= RMC_OPT_CAP_F;
             break;
         case 'R':
             options |= RMC_OPT_CAP_R;
+            break;
+        case 'E':
+            options |= RMC_OPT_CAP_E;
             break;
         case 'D':
             /* we don't know number of arguments for this option at this point,
@@ -388,7 +395,8 @@ int main(int argc, char **argv){
             break;
         case '?':
             if (optopt == 'F' || optopt == 'R' || optopt == 'D' || optopt == 'B' || \
-                    optopt == 'b' || optopt == 'f' || optopt == 'o' || optopt == 'd')
+                    optopt == 'E' ||  optopt == 'b' || optopt == 'f' || \
+                    optopt == 'o' || optopt == 'd')
                 fprintf(stderr, "\nWRONG USAGE: -%c\n\n", optopt);
             else if (isprint(optopt))
                 fprintf(stderr, "Unknown option `-%c'.\n\n", optopt);
@@ -421,6 +429,13 @@ int main(int argc, char **argv){
         return 1;
     }
 
+    /* sanity check for -E */
+    if ((options & RMC_OPT_CAP_E) && (!(options & RMC_OPT_F))) {
+        fprintf(stderr, "\nERROR: -E requires -f <fingerprint file name>\n\n");
+        usage();
+        return 1;
+    }
+
     /* sanity check for -B */
     if ((options & RMC_OPT_CAP_B) && (!(options & RMC_OPT_D) || !(options & RMC_OPT_O))) {
         fprintf(stderr, "\nWRONG: -B requires -d and -o\n\n");
@@ -445,8 +460,25 @@ int main(int argc, char **argv){
             rmc_free_file(&file);
             goto main_free;
         }
-
         rmc_free_file(&file);
+    }
+
+    if (options & RMC_OPT_CAP_E) {
+        /* print fingerpring file to console*/
+        if (options & RMC_OPT_F) {
+            rmc_fingerprint_t fp;
+            /* read fingerprint file*/
+            if (input_fingerprint != NULL) {
+                if (read_fingerprint_from_file(input_fingerprint, &fp, &raw_fp)) {
+                    fprintf(stderr, "Cannot read fingerprint from %s\n\n",
+                    input_fingerprint);
+                    goto main_free;
+                }
+                dump_fingerprint(&fp);
+            }else {
+                printf("Fingerprint file not provided! Exiting.\n");
+            }
+        }
     }
 
     /* generate RMC database file */
@@ -580,7 +612,6 @@ int main(int argc, char **argv){
             rmc_free_fingerprint(&fingerprint);
             goto main_free;
         }
-
         rmc_free_fingerprint(&fingerprint);
     }
 
