@@ -218,7 +218,6 @@ read_fp_done:
 static rmc_file_t *read_policy_file(char *pathname, int type) {
     rmc_file_t *tmp = NULL;
     rmc_size_t policy_len = 0;
-    int ret;
     char *path_token;
 
     if ((tmp = calloc(1, sizeof(rmc_file_t))) == NULL) {
@@ -230,8 +229,7 @@ static rmc_file_t *read_policy_file(char *pathname, int type) {
     tmp->next = NULL;
 
     if (type == RMC_GENERIC_FILE) {
-        ret = read_file(pathname, (char **)&tmp->blob, &policy_len);
-        if (ret) {
+        if (read_file(pathname, (char **)&tmp->blob, &policy_len)) {
             fprintf(stderr, "Failed to read file %s\n\n", pathname);
             free(tmp);
             return NULL;
