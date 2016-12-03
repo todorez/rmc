@@ -164,4 +164,11 @@ extern int rmcl_generate_db(rmc_record_file_t *record_files, rmc_uint8_t **rmc_d
  */
 extern int query_policy_from_db(rmc_fingerprint_t *fingerprint, rmc_uint8_t *rmc_db, rmc_uint8_t type, char *blob_name, rmc_file_t *policy);
 
+/*
+ * Check if db_blob has a valid rmc database signature
+ *
+ * return 0 if db_blob has a valid signature or non-zero otherwise
+ */
+int is_rmcdb(rmc_uint8_t *db_blob);
+
 #endif /* INC_RMCL_H_ */

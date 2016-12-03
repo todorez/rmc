@@ -31,8 +31,10 @@
   "running on\n" \
     "\t-d: database file to be queried\n" \
     "\t-o: path and name of output file of a specific command\n\n" \
-  "-E: Extract data from fingerprint file and print it to terminal\n" \
-    "\t-f: fingerprint file to extract\n\n" \
+  "-E: Extract data from fingerprint file or database\n" \
+    "\t-f: fingerprint file to extract\n" \
+    "\t-d: database file to extract\n" \
+    "\t-o: directory to extract the database to\n\n" \
     "Examples (Steps in an order to add board support into rmc):\n\n" \
     "1. Generate board fingerprint:\n" \
     "\trmc -F\n\n" \
@@ -408,12 +410,14 @@ int main(int argc, char **argv){
 
     /* sanity check for -o */
     if (options & RMC_OPT_O) {
-        rmc_uint16_t opt_o = options & (RMC_OPT_CAP_D | RMC_OPT_CAP_R | RMC_OPT_CAP_F | RMC_OPT_CAP_B);
+        rmc_uint16_t opt_o = options & (RMC_OPT_CAP_D | RMC_OPT_CAP_R |
+            RMC_OPT_CAP_F | RMC_OPT_CAP_B | RMC_OPT_CAP_E);
         if (!(opt_o)) {
-            fprintf(stderr, "\nWRONG: Option -o cannot be applied without -B, -D, -R or -F\n\n");
+            fprintf(stderr, "\nWRONG: Option -o cannot be applied without -B, -D, -E, -R or -F\n\n");
             usage();
             return 1;
-        } else if (opt_o != RMC_OPT_CAP_D && opt_o != RMC_OPT_CAP_R && opt_o != RMC_OPT_CAP_F && opt_o != RMC_OPT_CAP_B) {
+        } else if (opt_o != RMC_OPT_CAP_D && opt_o != RMC_OPT_CAP_R &&
+            opt_o != RMC_OPT_CAP_F && opt_o != RMC_OPT_CAP_B  && opt_o != RMC_OPT_CAP_E) {
             fprintf(stderr, "\nWRONG: Option -o can be applied with only one of -B, -D, -R and -F\n\n");
             usage();
             return 1;
@@ -428,8 +432,8 @@ int main(int argc, char **argv){
     }
 
     /* sanity check for -E */
-    if ((options & RMC_OPT_CAP_E) && (!(options & RMC_OPT_F))) {
-        fprintf(stderr, "\nERROR: -E requires -f <fingerprint file name>\n\n");
+    if ((options & RMC_OPT_CAP_E) && (!(options & RMC_OPT_F) && !(options & RMC_OPT_D))) {
+        fprintf(stderr, "\nERROR: -E requires -f <fingerprint file name> or -d <database file name>\n\n");
         usage();
         return 1;
     }
@@ -446,7 +450,8 @@ int main(int argc, char **argv){
         rmc_file_t file;
 
         if (!output_path) {
-            fprintf(stderr, "-B internal error, with -o but no output pathname specified\n\n");
+            fprintf(stderr, "-B internal error, with -o but no output \
+                pathname specified\n\n");
             goto main_free;
         }
 
@@ -454,7 +459,8 @@ int main(int argc, char **argv){
             goto main_free;
 
         if (write_file(output_path, file.blob, file.blob_len, 0)) {
-            fprintf(stderr, "-B failed to write file %s to %s\n\n", input_blob_name, output_path);
+            fprintf(stderr, "-B failed to write file %s to %s\n\n",
+                input_blob_name, output_path);
             rmc_free_file(&file);
             goto main_free;
         }
@@ -476,6 +482,12 @@ int main(int argc, char **argv){
             }else {
                 printf("Fingerprint file not provided! Exiting.\n");
             }
+        } else if (options & RMC_OPT_D) {
+            if(dump_db(input_db_path_d, output_path)) {
+               fprintf(stderr, "\nFailed to extract %s\n\n", input_db_path_d);
+               goto main_free;
+            } else
+               printf("\nSuccessfully extracted %s\n\n", input_db_path_d);
         }
     }
 

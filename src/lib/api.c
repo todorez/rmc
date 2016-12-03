@@ -3,6 +3,7 @@
  * RMC API implementation for Linux user space
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
@@ -10,12 +11,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <dirent.h>
+#include <ctype.h>
 
 #include <rmcl.h>
 #include <rsmp.h>
 
-#define EFI_SYSTAB_PATH "/sys/firmware/efi/systab"
-#define SYSTAB_LEN 4096         /* assume 4kb is enough...*/
+#define EFI_SYSTAB_PATH  "/sys/firmware/efi/systab"
+#define SYSTAB_LEN       4096             /* assume 4kb is enough...*/
+#define DB_DUMP_DIR      "./rmc_db_dump"  /* directory to store db data dump */
 
 int read_file(const char *pathname, char **data, rmc_size_t* len) {
     int fd = -1;
@@ -324,4 +328,122 @@ int rmc_gimme_file(char* db_pathname, char *file_name, rmc_file_t *file) {
     rmc_free_fingerprint(&fp);
 
     return ret;
+}
+
+static char *str2hex(const char *in) {
+    int i , len = strlen(in);
+    char *out = calloc(2*len+1, sizeof(char));
+    for (i = 0; i < len; i++) {
+        sprintf(&out[2*i], "%x", in[i]);
+    }
+    out[2*len+1] = '\0';
+    return out;
+}
+
+static int mkpath(const char *dir) {
+    char tmp[PATH_MAX], *path = NULL;
+    size_t len;
+
+    snprintf(tmp, sizeof(tmp),"%s",dir);
+    len = strlen(tmp);
+
+    /* mark end of path */
+    if(tmp[len - 1] == '/')
+        tmp[len - 1] = 0;
+
+    for(path = tmp + 1; *path; path++) {
+        if(*path == '/') {
+            /* mark end of directory chunk */
+            *path = 0;
+            /* try to create this portion of the path. Failing here is valid
+             * if the directory already exists. */
+            mkdir(tmp, S_IRWXU);
+            /* restore directory separator */
+            *path = '/';
+        }
+    }
+    return mkdir(tmp, S_IRWXU);
+}
+
+int dump_db(char *db_pathname, char *output_path) {
+    rmc_meta_header_t meta_header;
+    rmc_db_header_t *db_header = NULL;
+    rmc_record_header_t record_header;
+    rmc_uint64_t record_idx = 0;   /* offset of each reacord in db*/
+    rmc_uint64_t meta_idx = 0;     /* offset of each meta in a record */
+    rmc_uint64_t file_idx = 0;     /* offset of file in a meta */
+    rmc_file_t file;
+    char *out_dir = NULL, *out_name = NULL, *tmp_dir_name = NULL;
+    rmc_size_t db_len = 0;
+    rmc_uint8_t *rmc_db = NULL;
+    DIR *tmp_dir = NULL;
+
+    if (read_file(db_pathname, (char **)&rmc_db, &db_len)) {
+        fprintf(stderr, "Failed to read database file\n\n");
+        return 1;
+    }
+
+    db_header = (rmc_db_header_t *)rmc_db;
+
+    /* sanity check of db */
+    if (is_rmcdb(rmc_db))
+        return 1;
+
+    /* query the meta. idx: start of record */
+    record_idx = sizeof(rmc_db_header_t);
+    while (record_idx < db_header->length) {
+        memcpy(&record_header, rmc_db + record_idx,
+            sizeof(rmc_record_header_t));
+
+        /* directory name is fingerprint signature with stripped special chars*/
+        tmp_dir_name = str2hex((const char *)record_header.signature.raw);
+
+        if(output_path)
+            asprintf(&out_dir, "%s/%s/", output_path, tmp_dir_name);
+        else
+            asprintf(&out_dir, "%s/%s/", DB_DUMP_DIR, tmp_dir_name);
+        if ((tmp_dir = opendir(out_dir))) {
+            /* Directory exists */
+            closedir(tmp_dir);
+            free(tmp_dir_name);
+        } else if (ENOENT == errno) {
+            /* Directory does not exist, try to create it. */
+            if(mkpath(out_dir)) {
+                fprintf(stderr, "Failed to create %s directory\n\n", out_dir);
+                free(out_dir);
+                free(tmp_dir_name);
+                return 1;
+            }
+        } else {
+            /* Some other error occured */
+            free(out_dir);
+            free(tmp_dir_name);
+            return 1;
+        }
+
+        /* find meta */
+        for (meta_idx = record_idx + sizeof(rmc_record_header_t);
+            meta_idx < record_idx + record_header.length;) {
+            memcpy(&meta_header, rmc_db + meta_idx, sizeof(rmc_meta_header_t));
+            file_idx = meta_idx + sizeof(rmc_meta_header_t);
+            rmc_ssize_t name_len = strlen((char *)&rmc_db[file_idx]) + 1;
+            file.blob = &rmc_db[file_idx + name_len];
+            file.blob_len = meta_header.length - sizeof(rmc_meta_header_t) -
+                name_len;
+            file.next = NULL;
+            file.type = RMC_GENERIC_FILE;
+            asprintf(&out_name, "%s%s", out_dir, (char *)&rmc_db[file_idx]);
+            /* write file to dump directory */
+            if (write_file((const char *)out_name, file.blob, file.blob_len, 0))
+                return 1;
+
+            /* next meta */
+            meta_idx += meta_header.length;
+            free(out_name);
+        }
+        /* next record */
+        record_idx += record_header.length;
+        free(out_dir);
+    }
+    return 0;
 }
