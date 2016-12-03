@@ -193,6 +193,21 @@ static int match_record(rmc_record_header_t *r, rmc_signature_t* sig) {
     return strncmp((const char *)r->signature.raw, (const char *)sig->raw, sizeof(r->signature.raw));
 }
 
+int is_rmcdb(rmc_uint8_t *db_blob) {
+    rmc_db_header_t *db_header = NULL;
+
+    if (db_blob == NULL)
+        return 1;
+
+    db_header = (rmc_db_header_t *)db_blob;
+
+    /* sanity check of db */
+    if (strncmp((const char *)db_header->signature, (const char *)rmc_db_signature, RMC_DB_SIG_LEN))
+        return 1;
+    else
+        return 0;
+}
+
 int query_policy_from_db(rmc_fingerprint_t *fingerprint, rmc_uint8_t *rmc_db, rmc_uint8_t type, char *blob_name, rmc_file_t *policy) {
     rmc_meta_header_t meta_header;
     rmc_db_header_t *db_header = NULL;
@@ -211,7 +226,7 @@ int query_policy_from_db(rmc_fingerprint_t *fingerprint, rmc_uint8_t *rmc_db, rm
     db_header = (rmc_db_header_t *)rmc_db;
 
     /* sanity check of db */
-    if (strncmp((const char *)db_header->signature, (const char *)rmc_db_signature, RMC_DB_SIG_LEN))
+    if (is_rmcdb(rmc_db))
         return 1;
 
     /* calculate signature of fingerprint */
