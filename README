@@ -115,5 +115,6 @@ integrated with RMC (e.g. a Yocto BSP).
 shall be always for good changes passed code review, internal test and system
 test.
 
-Maintainer:
+Maintainers:
+todor.minchev@linux.intel.com
 jianxun.zhang@linux.intel.com
