@@ -1,4 +1,5 @@
-# Copyright (C) 2016 Jianxun Zhang <jianxun.zhang@intel.com>
+# Copyright (c) 2016 - 2017 Intel Corporation.
+# Author: Jianxun Zhang <jianxun.zhang@intel.com>
 
 TOPDIR = $(shell if [ -z "$$PWD" ]; then pwd; else echo "$$PWD"; fi)
 
