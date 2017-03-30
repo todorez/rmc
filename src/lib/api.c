@@ -35,6 +35,7 @@
 #include <sys/mman.h>
 #include <dirent.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include <rmcl.h>
 #include <rsmp.h>
